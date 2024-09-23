@@ -1,0 +1,4 @@
+[exec]
+command = "/home/pi/thinedge-demo/simpleLightControl.sh"
+topic = "c8y/s/dc/simple_light_control"
+on_message = "slc101"

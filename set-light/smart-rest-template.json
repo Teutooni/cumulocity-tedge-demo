@@ -1,0 +1,20 @@
+{
+  "name": "simple_light_control",
+  "type": "c8y_SmartRest2Template",
+  "com_cumulocity_model_smartrest_csv_CsvSmartRestTemplate": {
+    "requestTemplates": [],
+    "responseTemplates": [
+      {
+        "msgId": "slc101",
+        "condition": "set_light",
+        "base": "set_light",
+        "name": "set_light",
+        "pattern": [
+          "lightid",
+          "on"
+        ]
+      }
+    ]
+  },
+  "__externalId": "simple_light_control"
+}
