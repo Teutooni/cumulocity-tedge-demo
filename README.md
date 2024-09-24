@@ -1,15 +1,14 @@
 # Cumulocity with thin-edge demo
 
-Contents:
+Agenda:
 * Cumulocity overview
-* thin edge overview
-* demo
-* Useful tools
-
+* Quick tour of cumulocity portal
+* Thin-edge overview
+* Demo
 
 # Cumulocity
 
-Cumulocity is a cloud platform centered on IoT needs with a focus on ease of use and rapid deployment. As a cloud service it is limited compared to Azure or AWS for example, only offering services needed for device integration, management and data processing. [Docs](https://cumulocity.com/docs/)
+Cumulocity is a cloud platform centered on IoT needs with a focus on ease of use and rapid deployment. As a cloud service it is limited compared to Azure or AWS for example, mainly offering services needed for device integration, management and data processing. [Docs](https://cumulocity.com/docs/)
 
 Cumulocity does support tenant hierarchies, i.e. enterprise tenants which have subtenants under them. Also they offer the option to run cumulocity cloud on customer's own datacenter or server, in which case all data is presumably fully under customer's control.
 
@@ -27,7 +26,7 @@ Agents can communicate with the cloud with HTTP(S) or MQTT protocols. Agents sen
 
 ## Cloud
 
-The cloud is quite limited compared to a fully fledged cloud service like Azure or AWS. It offers prebuilt web applications for administration, cockpit, device management, digital twin management etc. in the portal. These can be extended or branded (say, making a new widget for cockpit), although they seem to be Angular JS based and at least their SDK is depracated.
+The cloud is quite limited compared to a fully fledged cloud service like Azure or AWS. It offers prebuilt web applications for administration, cockpit, device management, digital twin management etc. in the portal. These can be extended or branded (say, making a new widget for cockpit), although they seem to be Angular JS based and at least their SDK is deprecated.
 
 Some supported features:
 * Hosting web applications that can use whatever HTML5/javascript-based frameworks you want. 
@@ -40,7 +39,7 @@ Some supported features:
 ----------------------------------
 # thin-edge.io
 
-Open source (Apache 2.0 license) cloud agonstic IoT framework written in Rust, designed for resource constrained edge devices. [Docs](https://thin-edge.github.io/thin-edge.io/start/getting-started/) [Github](https://github.com/thin-edge/thin-edge.io)
+Open source (Apache 2.0 license) cloud-agonstic IoT framework written in Rust, designed for resource constrained edge devices. [Docs](https://thin-edge.github.io/thin-edge.io/start/getting-started/) [Github](https://github.com/thin-edge/thin-edge.io)
 
 Architecture in a nutshell:
 * Central MQTT bus for all communication (Mosquitto)
@@ -54,13 +53,25 @@ Architecture in a nutshell:
 
 # Demo
 
-Quick tour of cumulocity portal
-SSH to raspberry pi
-Install thin edge
-Install measurements script
-Install custom operation
+## Installing thin-edge
+
+1) Install thin edge: `sudo apt-get install tedge-full` or `wget -O - thin-edge.io/install.sh | sh -s`
+
+2) Create device certificate `sudo tedge cert create --device-id raspi_01`
+
+3) Configure cloud endpoint `sudo tedge config set c8y.url demo.cumulocity.com`
+
+4) Upload certificate to cloud `tedge cert upload c8y` you need to copy/paste username and password for c8y account
+
+> Tip: Make sure the certificate uploaded correctly by navigating to device management -> management -> trusted certificates in cumulocity portal
+
+5) Connect: `sudo tedge connect c8y`
+
+> Tip: Test the mqtt connection by creating a measurement: `tedge mqtt pub te/device/main///m/ '{"test_measurement": 5.0}'`
 
 ## Measurements
+
+An example script for Philips Hue motion sensor measurements
 
 [Simple motion sensor example](./motion-sensor/README.md)
 
@@ -88,16 +99,20 @@ topic s/dc/simple_light_control in 2 c8y/ ""
 ``` 
 
 > Tip: You can also verify the message is delivered correctly by listening to the cloud topic: `tedge mqtt sub 'c8y#'`
-> To send an operation, use c8y cli: `c8y identity get --name raspi_01 | c8y operations create --template "{'set_light':{lightid:1,on:true}}"`
+> To send an operation, use c8y cli: `c8y identity get --name raspi_01 | c8y operations create --description "test" --template "{'set_light':{lightid:1,on:true}}"`
 
 4) Create custom operations handler on thin edge:
 Add a file to `/etc/tedge/operations/c8y` as the tedge user: ```sudo -u tedge touch /etc/tedge/operations/c8y/set_light```
 Edit the [set_light](./set-light/set_light) and save
 
 5) Create the [script](./set-light/simpleLightControl.sh) that will be executed and make sure it has permissions
-> Tip: check file permissions: `ls -l`, set execute permissions for all users: `chmod +x simpleLightControl.sh`
+> Tip: check file permissions: `ls -l`, set execute permissions for all users: `chmod a+x simpleLightControl.sh`
 
-6) Create an operation (see above) and veryfiy that the scrip ran. It should produce a log file, configured inside the script.
+6) Thin edge needs to restart to register custom command: `sudo tedge reconnect c8y`
+
+7) Create an operation (see above) and veryfiy that the script ran. It should produce a log file, configured inside the script.
+
+> Tip: since the light control script pipes output to a log file, make sure the tedge user has rights to write it.
 
 -----------------------------
 

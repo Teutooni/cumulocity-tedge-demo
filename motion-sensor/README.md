@@ -1,5 +1,7 @@
 # Monitoring script for Philips Hue motion sensor
 
+[script](./monitor-motion-sensor.py)
+
 Requires Python 3.10+ as it uses [aiohue](https://github.com/home-assistant-libs/aiohue) to listen for events on Hue bridge v2. Update hueip and huetoken accordingly.
 
 Does one thing: triggers on Hue ResourceTypes.MOTION event and sends a "te/device/main///m/sensors" measurement to thin edge.
